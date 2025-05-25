@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Learning GPU Cluster Proposals - Technical Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #92a452 0%, #943423 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .meta {
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 3rem 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .section h3 {
+            font-size: 1.4rem;
+            margin: 2rem 0 1rem;
+            color: #34495e;
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .proposal-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .proposal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .proposal-card h3 {
+            color: #667eea;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .proposal-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .figure-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .figure-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            margin: 1rem 0;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .figure-caption {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        .cost-summary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .cost-summary h3 {
+            margin: 0 0 1rem;
+            color: white;
+        }
+
+        .cost-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .cost-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cost-item .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .cost-item .value {
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .highlight-box {
+            background: #e8f4fd;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .pros, .cons {
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .pros {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .cons {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .pros h4, .cons h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .pros h4 {
+            color: #155724;
+        }
+
+        .cons h4 {
+            color: #721c24;
+        }
+
+        ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 2rem 1rem;
+            }
+            
+            .pros-cons {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .cost-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animation for smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Add some subtle animations */
+        .proposal-card, .highlight-box, .cost-summary {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Machine Learning GPU Cluster Proposals</h1>
+            <div class="subtitle">Technical Analysis and Cost Comparison</div>
+            <div class="meta">Prepared for [Company Name] • [Your Name] • [Date]</div>
+        </header>
+
+        <main class="content">
+            <section class="section">
+                <h2>Executive Summary</h2>
+                <p>This report presents three comprehensive proposals for implementing a machine learning GPU cluster to support our organization's AI training requirements. Each proposal has been carefully designed to balance performance, scalability, and cost-effectiveness while addressing different operational scenarios and budget constraints.</p>
+                
+                <div class="highlight-box">
+                    <strong>Key Considerations:</strong> All proposals include hardware specifications, infrastructure requirements, operational costs, and implementation timelines. The analysis considers both immediate needs and future scalability requirements.
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Current Requirements Analysis</h2>
+                <p>Based on our assessment of current and projected machine learning workloads, we have identified the following key requirements:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Requirement</th>
+                            <th>Current Need</th>
+                            <th>Projected (12 months)</th>
+                            <th>Priority</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Training Throughput</td>
+                            <td>[Insert current data]</td>
+                            <td>[Insert projected data]</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td>Memory Requirements</td>
+                            <td>[Insert current data]</td>
+                            <td>[Insert projected data]</td>
+                            <td>High</td>
+                        </tr>
+                        <tr>
+                            <td>Storage Capacity</td>
+                            <td>[Insert current data]</td>
+                            <td>[Insert projected data]</td>
+                            <td>Medium</td>
+                        </tr>
+                        <tr>
+                            <td>Concurrent Users</td>
+                            <td>[Insert current data]</td>
+                            <td>[Insert projected data]</td>
+                            <td>Medium</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Figure 1: Current vs. Projected Workload Analysis]<br>
+                        <small>Upload your workload analysis chart here</small>
+                    </div>
+                    <div class="figure-caption">Figure 1: Workload growth projection over 24 months</div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Proposal Comparison Overview</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total GPUs</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                        </tr>
+                        <tr>
+                            <td>GPU Model</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                        </tr>
+                        <tr>
+                            <td>Total Memory</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                        </tr>
+                        <tr>
+                            <td>Estimated Performance</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                        </tr>
+                        <tr>
+                            <td>Implementation Time</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                            <td>[Insert data]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Detailed Proposals</h2>
+
+                <div class="proposal-card">
+                    <h3><span class="proposal-number">1</span>Entry-Level Cluster</h3>
+                    <p>Designed for organizations beginning their ML journey or with moderate computational requirements. This proposal focuses on cost-effectiveness while providing a solid foundation for machine learning workloads.</p>
+                    
+                    <h4>Hardware Specifications</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Specification</th>
+                                <th>Quantity</th>
+                                <th>Unit Cost</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GPU</td>
+                                <td>[Insert GPU model]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Server Nodes</td>
+                                <td>[Insert server specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Networking</td>
+                                <td>[Insert network specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Storage</td>
+                                <td>[Insert storage specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✓ Advantages</h4>
+                            <ul>
+                                <li>Lower initial investment</li>
+                                <li>Easier to manage and maintain</li>
+                                <li>Suitable for proof-of-concept projects</li>
+                                <li>Quick deployment timeline</li>
+                                <li>[Add specific advantages]</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>✗ Limitations</h4>
+                            <ul>
+                                <li>Limited scalability</li>
+                                <li>May not handle large models efficiently</li>
+                                <li>Lower performance per dollar in long term</li>
+                                <li>[Add specific limitations]</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="figure-container">
+                        <div class="figure-placeholder">
+                            [Figure 2: Proposal 1 Architecture Diagram]<br>
+                            <small>Upload your architecture diagram here</small>
+                        </div>
+                        <div class="figure-caption">Figure 2: Entry-level cluster architecture</div>
+                    </div>
+                </div>
+
+                <div class="proposal-card">
+                    <h3><span class="proposal-number">2</span>Mid-Range Performance Cluster</h3>
+                    <p>Balanced approach offering significant computational power while maintaining reasonable costs. Ideal for production environments with growing ML requirements.</p>
+                    
+                    <h4>Hardware Specifications</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Specification</th>
+                                <th>Quantity</th>
+                                <th>Unit Cost</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GPU</td>
+                                <td>[Insert GPU model]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Server Nodes</td>
+                                <td>[Insert server specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Networking</td>
+                                <td>[Insert network specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Storage</td>
+                                <td>[Insert storage specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✓ Advantages</h4>
+                            <ul>
+                                <li>Good balance of performance and cost</li>
+                                <li>Supports medium to large model training</li>
+                                <li>Room for expansion</li>
+                                <li>Production-ready infrastructure</li>
+                                <li>[Add specific advantages]</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>✗ Limitations</h4>
+                            <ul>
+                                <li>Higher initial investment than Proposal 1</li>
+                                <li>More complex management requirements</li>
+                                <li>May require additional expertise</li>
+                                <li>[Add specific limitations]</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="figure-container">
+                        <div class="figure-placeholder">
+                            [Figure 3: Proposal 2 Architecture Diagram]<br>
+                            <small>Upload your architecture diagram here</small>
+                        </div>
+                        <div class="figure-caption">Figure 3: Mid-range cluster architecture</div>
+                    </div>
+                </div>
+
+                <div class="proposal-card">
+                    <h3><span class="proposal-number">3</span>High-Performance Enterprise Cluster</h3>
+                    <p>Maximum performance solution designed for enterprise-scale machine learning operations. Supports the most demanding workloads and provides extensive scalability.</p>
+                    
+                    <h4>Hardware Specifications</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Specification</th>
+                                <th>Quantity</th>
+                                <th>Unit Cost</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GPU</td>
+                                <td>[Insert GPU model]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Server Nodes</td>
+                                <td>[Insert server specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Networking</td>
+                                <td>[Insert network specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                            <tr>
+                                <td>Storage</td>
+                                <td>[Insert storage specs]</td>
+                                <td>[Insert quantity]</td>
+                                <td>$[Insert cost]</td>
+                                <td>$[Insert total]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h4>✓ Advantages</h4>
+                            <ul>
+                                <li>Maximum computational performance</li>
+                                <li>Supports largest model training</li>
+                                <li>Highly scalable architecture</li>
+                                <li>Future-proof investment</li>
+                                <li>Enterprise-grade reliability</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h4>✗ Limitations</h4>
+                            <ul>
+                                <li>Highest initial investment</li>
+                                <li>Complex infrastructure requirements</li>
+                                <li>Requires specialized expertise</li>
+                                <li>Higher operational costs</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="figure-container">
+                        <div class="figure-placeholder">
+                            [Figure 4: Proposal 3 Architecture Diagram]<br>
+                            <small>Upload your architecture diagram here</small>
+                        </div>
+                        <div class="figure-caption">Figure 4: Enterprise cluster architecture</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Cost Analysis Summary</h2>
+                
+                <div class="cost-summary">
+                    <h3>Total Cost Comparison</h3>
+                    <div class="cost-grid">
+                        <div class="cost-item">
+                            <div class="label">Proposal 1 - Entry Level</div>
+                            <div class="value">$[Insert total cost]</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="label">Proposal 2 - Mid-Range</div>
+                            <div class="value">$[Insert total cost]</div>
+                        </div>
+                        <div class="cost-item">
+                            <div class="label">Proposal 3 - Enterprise</div>
+                            <div class="value">$[Insert total cost]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Detailed Cost Breakdown</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cost Category</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hardware (GPUs)</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Server Infrastructure</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Networking Equipment</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Storage Systems</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Software Licenses</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Installation & Setup</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Implementation Time</strong></td>
+                            <td><strong>[Insert total]</strong></td>
+                            <td><strong>[Insert total]</strong></td>
+                            <td><strong>[Insert total]</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Figure 7: Implementation Timeline Gantt Chart]<br>
+                        <small>Upload your project timeline visualization here</small>
+                    </div>
+                    <div class="figure-caption">Figure 7: Implementation timeline comparison</div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Risk Assessment</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Risk Factor</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                            <th>Mitigation Strategy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hardware Availability</td>
+                            <td>Low</td>
+                            <td>Medium</td>
+                            <td>High</td>
+                            <td>Early procurement, multiple vendors</td>
+                        </tr>
+                        <tr>
+                            <td>Technical Complexity</td>
+                            <td>Low</td>
+                            <td>Medium</td>
+                            <td>High</td>
+                            <td>Phased implementation, expert consultation</td>
+                        </tr>
+                        <tr>
+                            <td>Budget Overrun</td>
+                            <td>Low</td>
+                            <td>Medium</td>
+                            <td>Medium</td>
+                            <td>Detailed cost tracking, contingency planning</td>
+                        </tr>
+                        <tr>
+                            <td>Power Infrastructure</td>
+                            <td>Low</td>
+                            <td>Medium</td>
+                            <td>High</td>
+                            <td>Infrastructure assessment, upgrades</td>
+                        </tr>
+                        <tr>
+                            <td>Obsolescence Risk</td>
+                            <td>Medium</td>
+                            <td>Low</td>
+                            <td>Low</td>
+                            <td>Future-proof architecture, upgrade paths</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Recommendations</h2>
+                
+                <div class="highlight-box">
+                    <h3>Primary Recommendation</h3>
+                    <p><strong>[Insert your recommended proposal here]</strong> based on the following analysis:</p>
+                    <ul>
+                        <li>[Insert key reason 1]</li>
+                        <li>[Insert key reason 2]</li>
+                        <li>[Insert key reason 3]</li>
+                        <li>[Insert key reason 4]</li>
+                    </ul>
+                </div>
+
+                <h3>Decision Factors by Use Case</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Recommended Proposal</th>
+                            <th>Justification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Startup/POC Environment</td>
+                            <td>Proposal 1</td>
+                            <td>Lower risk, faster deployment, cost-effective</td>
+                        </tr>
+                        <tr>
+                            <td>Growing ML Team</td>
+                            <td>Proposal 2</td>
+                            <td>Balanced performance and scalability</td>
+                        </tr>
+                        <tr>
+                            <td>Enterprise Production</td>
+                            <td>Proposal 3</td>
+                            <td>Maximum performance, future-proof investment</td>
+                        </tr>
+                        <tr>
+                            <td>Budget Constrained</td>
+                            <td>Proposal 1</td>
+                            <td>Lowest initial investment, proven ROI</td>
+                        </tr>
+                        <tr>
+                            <td>Research Institution</td>
+                            <td>Proposal 2 or 3</td>
+                            <td>Flexibility for diverse workloads</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Next Steps</h2>
+                
+                <div class="highlight-box">
+                    <h3>Immediate Actions Required</h3>
+                    <ol>
+                        <li><strong>Decision Timeline:</strong> [Insert decision deadline]</li>
+                        <li><strong>Budget Approval:</strong> Secure funding for selected proposal</li>
+                        <li><strong>Vendor Engagement:</strong> Begin detailed discussions with hardware suppliers</li>
+                        <li><strong>Infrastructure Assessment:</strong> Evaluate facility requirements (power, cooling, space)</li>
+                        <li><strong>Team Preparation:</strong> Plan for training and hiring if needed</li>
+                    </ol>
+                </div>
+
+                <h3>Implementation Phases</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Duration</th>
+                            <th>Key Activities</th>
+                            <th>Deliverables</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Phase 1: Planning</td>
+                            <td>[Insert duration]</td>
+                            <td>Detailed design, procurement planning</td>
+                            <td>Technical specifications, vendor contracts</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 2: Procurement</td>
+                            <td>[Insert duration]</td>
+                            <td>Hardware ordering, delivery coordination</td>
+                            <td>Hardware delivery, installation readiness</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 3: Installation</td>
+                            <td>[Insert duration]</td>
+                            <td>Physical setup, network configuration</td>
+                            <td>Operational cluster, basic testing</td>
+                        </tr>
+                        <tr>
+                            <td>Phase 4: Validation</td>
+                            <td>[Insert duration]</td>
+                            <td>Performance testing, optimization</td>
+                            <td>Production-ready system, documentation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Appendices</h2>
+                
+                <h3>Technical Specifications</h3>
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Appendix A: Detailed Hardware Specifications]<br>
+                        <small>Upload detailed spec sheets here</small>
+                    </div>
+                </div>
+
+                <h3>Vendor Information</h3>
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Appendix B: Vendor Quotes and Comparisons]<br>
+                        <small>Upload vendor documentation here</small>
+                    </div>
+                </div>
+
+                <h3>Performance Benchmarks</h3>
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Appendix C: Detailed Benchmark Results]<br>
+                        <small>Upload benchmark data and charts here</small>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>This technical report was prepared for [Company Name] evaluation purposes. All specifications and costs are estimates based on current market conditions and may be subject to change.</p>
+            <p>For questions or clarifications, please contact [Your Name] at [Your Email]</p>
+        </footer>
+    </div>
+
+    <script>
+        // Simple script to add interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth scrolling for any internal links
+            const links = document.querySelectorAll('a[href^="#"]');
+            links.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Add hover effects to proposal cards
+            const proposalCards = document.querySelectorAll('.proposal-card');
+            proposalCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+            });
+
+            // Add click-to-edit functionality for placeholders
+            const placeholders = document.querySelectorAll('.figure-placeholder');
+            placeholders.forEach(placeholder => {
+                placeholder.addEventListener('click', function() {
+                    alert('Click here to upload your figure/chart. You can replace this placeholder with your actual images or charts.');
+                });
+                placeholder.style.cursor = 'pointer';
+            });
+
+            // Highlight tables on hover
+            const tables = document.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    row.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = '#f8f9fa';
+                        this.style.transition = 'background-color 0.2s ease';
+                    });
+                    row.addEventListener('mouseleave', function() {
+                        this.style.backgroundColor = '';
+                    });
+                });
+            });
+        });
+
+        // Function to update cost calculations (you can call this when editing costs)
+        function updateCostCalculations() {
+            // This is a placeholder function - you can implement actual cost calculation logic here
+            console.log('Cost calculations updated');
+        }
+
+        // Function to add new table rows dynamically
+        function addTableRow(tableId, rowData) {
+            const table = document.getElementById(tableId);
+            if (table) {
+                const tbody = table.querySelector('tbody');
+                const newRow = tbody.insertRow();
+                rowData.forEach(cellData => {
+                    const cell = newRow.insertCell();
+                    cell.textContent = cellData;
+                });
+            }
+        }
+    </script>
+</body>
+</html> Initial Cost</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Operational Costs (Annual)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operational Cost</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Power Consumption</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Cooling</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Maintenance</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td>Support Contracts</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                            <td>$[Insert cost]</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Annual OpEx</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                            <td><strong>$[Insert total]</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Figure 5: Cost Comparison Chart]<br>
+                        <small>Upload your cost comparison visualization here</small>
+                    </div>
+                    <div class="figure-caption">Figure 5: Total cost of ownership comparison over 3 years</div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Performance Analysis</h2>
+                
+                <div class="figure-container">
+                    <div class="figure-placeholder">
+                        [Figure 6: Performance Benchmarks]<br>
+                        <small>Upload your performance comparison charts here</small>
+                    </div>
+                    <div class="figure-caption">Figure 6: Training performance comparison across proposals</div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Benchmark</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ResNet-50 Training (images/sec)</td>
+                            <td>[Insert performance]</td>
+                            <td>[Insert performance]</td>
+                            <td>[Insert performance]</td>
+                        </tr>
+                        <tr>
+                            <td>BERT Large Training Time</td>
+                            <td>[Insert time]</td>
+                            <td>[Insert time]</td>
+                            <td>[Insert time]</td>
+                        </tr>
+                        <tr>
+                            <td>GPT Model Support (Parameters)</td>
+                            <td>[Insert capacity]</td>
+                            <td>[Insert capacity]</td>
+                            <td>[Insert capacity]</td>
+                        </tr>
+                        <tr>
+                            <td>Concurrent Training Jobs</td>
+                            <td>[Insert number]</td>
+                            <td>[Insert number]</td>
+                            <td>[Insert number]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="section">
+                <h2>Implementation Timeline</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Phase</th>
+                            <th>Proposal 1</th>
+                            <th>Proposal 2</th>
+                            <th>Proposal 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hardware Procurement</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                        </tr>
+                        <tr>
+                            <td>Infrastructure Setup</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                        </tr>
+                        <tr>
+                            <td>Software Installation</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                        </tr>
+                        <tr>
+                            <td>Testing & Validation</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                            <td>[Insert timeline]</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total
