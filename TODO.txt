@@ -1,0 +1,22 @@
+TODO:
+- explain why 2x RAM vs VRAM and why it is an useful heuristic and not a performance variable
+- explain why VRAM is necessary to run models with a lot of parameters
+- explain why 6x(# of GPUs) CPU cores is necessary for parallelization (outside of it nonlinear gains)
+- explain the need for NVLink for training workloads
+- graph CUDA compute capability vs version
+- graph CUDA compute capability vs year
+- graph PyTorch compute capability vs version
+- graph PyTorch compute capability vs version
+- graph DLPerf vs price for 1x GPUs (best case)
+- graph DLPerf variability for 3090, so for each 3090
+	- DLPerf score vs GPU PCIe bandwidth
+	- DLPerf score vs PCIe lanes
+	- DLPerf score vs PCIe version
+	- DLPerf score vs disk speed
+-graph DLPerf vs number of GPUs for 3090
+-2 PSUs, each connected to a different 15A breaker
+https://www.youtube.com/watch?v=bfkXc4rU-QU
+https://timdettmers.com/2023/01/30/which-gpu-for-deep-learning/
+https://cloud.vast.ai/
+https://digitalspaceport.com/truenas-storage-server-2000-nas-for-homelab-storage/
+https://github.com/pytorch/pytorch/wiki/PyTorch-Versions
