@@ -20,3 +20,6 @@ https://timdettmers.com/2023/01/30/which-gpu-for-deep-learning/
 https://cloud.vast.ai/
 https://digitalspaceport.com/truenas-storage-server-2000-nas-for-homelab-storage/
 https://github.com/pytorch/pytorch/wiki/PyTorch-Versions
+https://developer.nvidia.com/cuda-gpus
+https://developer.nvidia.com/cuda-legacy-gpus
+https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
