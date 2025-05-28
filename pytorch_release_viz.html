@@ -261,7 +261,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalArchs">-</div>
-                <div class="stat-label">Unique Architectures</div>
+                <div class="stat-label">Compatible Cards</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="latestVersion">-</div>
@@ -275,49 +275,6 @@
     </div>
 
     <script>
-        // Sample data structure - replace this with your actual JSON data
-        const sampleData = {
-            "2.5.0": {
-                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
-                "release_date": "10/17/2024"
-            },
-            "2.4.0": {
-                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89"],
-                "release_date": "07/24/2024"
-            },
-            "2.3.0": {
-                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "04/24/2024"
-            },
-            "2.2.0": {
-                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "01/30/2024"
-            },
-            "2.1.0": {
-                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "10/04/2023"
-            },
-            "2.0.0": {
-                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "03/15/2023"
-            },
-            "1.13.0": {
-                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "10/28/2022"
-            },
-            "1.12.0": {
-                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "06/28/2022"
-            },
-            "1.11.0": {
-                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80"],
-                "release_date": "02/10/2022"
-            },
-            "1.10.0": {
-                "architectures": ["sm_35", "sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
-                "release_date": "10/21/2021"
-            }
-        };
 
         class PyTorchTimeline {
             constructor(data) {
@@ -370,10 +327,10 @@
 
             updateStats() {
                 const releases = Object.keys(this.filteredData).length;
-                const allArchs = new Set();
+                const allCards = new Set();
                 Object.values(this.filteredData).forEach(info => {
-                    if (info.architectures) {
-                        info.architectures.forEach(arch => allArchs.add(arch));
+                    if (info.cards) {
+                        info.cards.forEach(card => allCards.add(card));
                     }
                 });
                 
@@ -382,7 +339,7 @@
                 });
 
                 document.getElementById('totalReleases').textContent = releases;
-                document.getElementById('totalArchs').textContent = allArchs.size;
+                document.getElementById('totalArchs').textContent = allCards.size;
                 document.getElementById('latestVersion').textContent = sortedVersions[0] || 'N/A';
             }
 
@@ -414,16 +371,16 @@
                     const item = document.createElement('div');
                     item.className = 'release-item';
                     
-                    const architecturesHtml = info.architectures 
-                        ? info.architectures.map(arch => `<span class="arch-tag">${arch}</span>`).join('')
-                        : '<span class="arch-tag">No architecture data</span>';
+                    const cardsHtml = info.cards 
+                        ? info.cards.map(card => `<span class="arch-tag">${card}</span>`).join('')
+                        : '<span class="arch-tag">No card data</span>';
 
                     item.innerHTML = `
                         <div class="release-content">
                             <div class="release-version">${version}</div>
                             <div class="release-date">${info.release_date}</div>
-                            <div>Supported CUDA Architectures:</div>
-                            <div class="architectures">${architecturesHtml}</div>
+                            <div>Compatible GPU Cards:</div>
+                            <div class="architectures">${cardsHtml}</div>
                         </div>
                         <div class="timeline-dot"></div>
                     `;
@@ -459,30 +416,28 @@
             }
         }
 
-        // Initialize the timeline
-        // TO USE WITH YOUR DATA: Replace 'sampleData' with your actual JSON data
-        // You can either:
-        // 1. Replace sampleData with your data directly
-        // 2. Load it from your JSON file using fetch()
-        // 3. Paste your JSON data into the sampleData variable
-
-        document.addEventListener('DOMContentLoaded', () => {
-            new PyTorchTimeline(sampleData);
-        });
-
-        // Uncomment this section if you want to load from a JSON file:
-        /*
-        fetch('all_pytorch_architectures.json')
-            .then(response => response.json())
-            .then(data => {
+        // Load PyTorch release data from file
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Use fetch to load the JSON file
+                const response = await fetch('all_pytorch_compatible_cards.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Initialize the timeline with the loaded data
                 new PyTorchTimeline(data);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Error loading data:', error);
                 document.getElementById('timeline').innerHTML = 
-                    '<div class="loading">Error loading PyTorch release data. Please check the console.</div>';
-            });
-        */
+                    `<div class="loading">Error loading PyTorch release data: ${error.message}<br><br>
+                    <strong>Note:</strong> When running locally, you may need to serve the files through a local web server due to CORS restrictions.<br>
+                    Try using: <code>python -m http.server 8000</code> or similar.</div>`;
+            }
+        });
     </script>
 </body>
 </html>
