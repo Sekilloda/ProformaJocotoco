@@ -8,12 +8,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Historial de compatibilidad</h1>
+        <h1>Historial de compatibilidad de PyTorch</h1>
         
         <div class="controls">
             <button class="filter-btn active" data-filter="all">Todas las versiones</button>
             <button class="filter-btn" data-filter="major">Versiones importantes</button>
-            <button class="filter-btn" data-filter="recent">Reciente (2020 en adelante)</button>
+            <button class="filter-btn" data-filter="recent">Reciente (2022 en adelante)</button>
         </div>
 
         <div class="stats" id="stats">
@@ -76,7 +76,7 @@
                             Object.entries(this.data).filter(([version, info]) => {
                                 if (!info.release_date) return false;
                                 const year = new Date(info.release_date).getFullYear();
-                                return year >= 2020;
+                                return year >= 2022;
                             })
                         );
                         break;
