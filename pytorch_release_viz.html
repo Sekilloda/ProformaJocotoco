@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyTorch Release Timeline</title>
+    <title>Historial de compatibilidad de PyTorch</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>PyTorch Release Timeline</h1>
+        <h1>Historial de compatibilidad</h1>
         
         <div class="controls">
-            <button class="filter-btn active" data-filter="all">All Releases</button>
-            <button class="filter-btn" data-filter="major">Major Releases</button>
-            <button class="filter-btn" data-filter="recent">Recent (2023+)</button>
+            <button class="filter-btn active" data-filter="all">Todas las versiones</button>
+            <button class="filter-btn" data-filter="major">Versiones importantes</button>
+            <button class="filter-btn" data-filter="recent">Reciente (2020 en adelante)</button>
         </div>
 
         <div class="stats" id="stats">
             <div class="stat-card">
                 <div class="stat-number" id="totalReleases">-</div>
-                <div class="stat-label">Total Releases</div>
+                <div class="stat-label">Versiones</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="totalArchs">-</div>
-                <div class="stat-label">Compatible Cards</div>
+                <div class="stat-label">GPUs compatibles</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="latestVersion">-</div>
-                <div class="stat-label">Latest Version</div>
+                <div class="stat-label">Última versión</div>
             </div>
         </div>
 
         <div class="timeline" id="timeline">
-            <div class="loading">Loading PyTorch release data...</div>
+            <div class="loading">Cargando versiones de PyTorch...</div>
         </div>
     </div>
 
@@ -76,7 +76,7 @@
                             Object.entries(this.data).filter(([version, info]) => {
                                 if (!info.release_date) return false;
                                 const year = new Date(info.release_date).getFullYear();
-                                return year >= 2023;
+                                return year >= 2020;
                             })
                         );
                         break;
@@ -135,13 +135,13 @@
                     
                     const cardsHtml = info.cards 
                         ? info.cards.map(card => `<span class="arch-tag">${card}</span>`).join('')
-                        : '<span class="arch-tag">No card data</span>';
+                        : '<span class="arch-tag">No se encontraron GPUs</span>';
 
                     item.innerHTML = `
                         <div class="release-content">
                             <div class="release-version">${version}</div>
                             <div class="release-date">${info.release_date}</div>
-                            <div>Compatible GPU Cards:</div>
+                            <div>GPUs compatibles:</div>
                             <div class="architectures">${cardsHtml}</div>
                         </div>
                         <div class="timeline-dot"></div>
@@ -193,11 +193,10 @@
                 // Initialize the timeline with the loaded data
                 new PyTorchTimeline(data);
             } catch (error) {
-                console.error('Error loading data:', error);
+                console.error('Error:', error);
                 document.getElementById('timeline').innerHTML = 
-                    `<div class="loading">Error loading PyTorch release data: ${error.message}<br><br>
-                    <strong>Note:</strong> When running locally, you may need to serve the files through a local web server due to CORS restrictions.<br>
-                    Try using: <code>python -m http.server 8000</code> or similar.</div>`;
+                    `<div class="loading">Error al cargar versiones de PyTorch: ${error.message}<br><br>
+                    <strong>Note:</strong> CORS.</div>`;
             }
         });
     </script>
