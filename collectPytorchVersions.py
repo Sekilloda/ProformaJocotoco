@@ -282,5 +282,60 @@ def main():
     except IOError as e: logging.error(f"Error writing compatible cards file '{cards_output_filepath}': {e}")
     except Exception as e: logging.error(f"Unexpected error writing compatible cards file: {e}")
 
+    # Release date mapping from your table
+    pytorch_release_dates = {
+        "2.7.0": "04/23/2025",
+        "2.6.0": "01/30/2025", 
+        "2.5.0": "10/17/2024",
+        "2.4.0": "07/24/2024",
+        "2.3.0": "04/24/2024",
+        "2.2.0": "01/30/2024",
+        "2.1.0": "10/04/2023",
+        "2.0.0": "03/15/2023",
+        "1.13.0": "10/28/2022",
+        "1.12.0": "06/28/2022",
+        "1.11.0": "02/10/2022",
+        "1.10.1": "12/15/2021",
+        "1.10.0": "10/21/2021",
+        "1.9.1": "09/21/2021",
+        "1.9.0": "06/15/2021",
+        "1.8.1": "03/25/2021",
+        "1.8.0": "03/04/2021",
+        "1.7.1": "12/10/2020",
+        "1.7.0": "10/27/2020",
+        "1.6.0": "07/28/2020",
+        "1.5.1": "06/18/2020",
+        "1.5.0": "04/21/2020",
+        "1.4.0": "01/15/2020",
+        "1.3.1": "11/07/2019",
+        "1.3.0": "10/22/2019",
+        "1.2.0": "08/08/2019",
+        "1.1.0": "04/30/2019",
+        "1.0.0": "12/07/2018",
+        "0.4.1": "07/26/2018",
+        "0.4.0": "04/24/2018",
+        "0.3.1": "04/03/2018",
+        "0.3.0": "01/25/2018"
+    }
+
+    # Load your existing JSON file
+    with open('all_pytorch_compatible_cards.json', 'r') as f:
+        pytorch_cards = json.load(f)
+
+    # Add release dates to matching versions
+    for version, cards in pytorch_cards.items():
+        if version in pytorch_release_dates:
+            # Convert to a dictionary format that includes both architectures and release date
+            pytorch_cards[version] = {
+                "cards": cards,
+                "release_date": pytorch_release_dates[version]
+            }
+
+    # Save the updated JSON file
+    with open('all_pytorch_compatible_cards.json', 'w') as f:
+        json.dump(pytorch_cards, f, indent=2)
+
+    print(f"Updated {len([v for v in pytorch_cards.keys() if v in pytorch_release_dates])} versions with release dates")
+
 if __name__ == "__main__":
     main()

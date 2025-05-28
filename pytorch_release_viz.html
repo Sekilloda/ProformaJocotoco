@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTorch Release Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ee7752, #e73c7e, #23a6d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #ee7752, #e73c7e);
+            transform: scale(1.05);
+        }
+
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .release-item {
+            display: flex;
+            margin: 30px 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .release-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .release-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .release-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 0 30px;
+            width: calc(50% - 30px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .release-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .release-version {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .release-date {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .architectures {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .arch-tag {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .arch-tag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #ee7752, #e73c7e);
+            border: 4px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-dot:hover {
+            transform: translate(-50%, 50%) scale(1.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .release-item {
+                flex-direction: row !important;
+            }
+            
+            .release-content {
+                width: calc(100% - 60px);
+                margin-left: 50px;
+                margin-right: 0;
+            }
+            
+            .timeline-dot {
+                left: 20px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PyTorch Release Timeline</h1>
+        
+        <div class="controls">
+            <button class="filter-btn active" data-filter="all">All Releases</button>
+            <button class="filter-btn" data-filter="major">Major Releases</button>
+            <button class="filter-btn" data-filter="recent">Recent (2023+)</button>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalReleases">-</div>
+                <div class="stat-label">Total Releases</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalArchs">-</div>
+                <div class="stat-label">Unique Architectures</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="latestVersion">-</div>
+                <div class="stat-label">Latest Version</div>
+            </div>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <div class="loading">Loading PyTorch release data...</div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data structure - replace this with your actual JSON data
+        const sampleData = {
+            "2.5.0": {
+                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89", "sm_90"],
+                "release_date": "10/17/2024"
+            },
+            "2.4.0": {
+                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86", "sm_89"],
+                "release_date": "07/24/2024"
+            },
+            "2.3.0": {
+                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "04/24/2024"
+            },
+            "2.2.0": {
+                "architectures": ["sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "01/30/2024"
+            },
+            "2.1.0": {
+                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "10/04/2023"
+            },
+            "2.0.0": {
+                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "03/15/2023"
+            },
+            "1.13.0": {
+                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "10/28/2022"
+            },
+            "1.12.0": {
+                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "06/28/2022"
+            },
+            "1.11.0": {
+                "architectures": ["sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80"],
+                "release_date": "02/10/2022"
+            },
+            "1.10.0": {
+                "architectures": ["sm_35", "sm_37", "sm_50", "sm_60", "sm_61", "sm_70", "sm_75", "sm_80", "sm_86"],
+                "release_date": "10/21/2021"
+            }
+        };
+
+        class PyTorchTimeline {
+            constructor(data) {
+                this.data = data;
+                this.filteredData = data;
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.updateStats();
+                this.renderTimeline();
+                this.animateOnScroll();
+            }
+
+            setupEventListeners() {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.filterData(e.target.dataset.filter);
+                    });
+                });
+            }
+
+            filterData(filter) {
+                switch(filter) {
+                    case 'major':
+                        this.filteredData = Object.fromEntries(
+                            Object.entries(this.data).filter(([version]) => 
+                                version.endsWith('.0.0') || version.endsWith('.0')
+                            )
+                        );
+                        break;
+                    case 'recent':
+                        this.filteredData = Object.fromEntries(
+                            Object.entries(this.data).filter(([version, info]) => {
+                                if (!info.release_date) return false;
+                                const year = new Date(info.release_date).getFullYear();
+                                return year >= 2023;
+                            })
+                        );
+                        break;
+                    default:
+                        this.filteredData = this.data;
+                }
+                this.updateStats();
+                this.renderTimeline();
+            }
+
+            updateStats() {
+                const releases = Object.keys(this.filteredData).length;
+                const allArchs = new Set();
+                Object.values(this.filteredData).forEach(info => {
+                    if (info.architectures) {
+                        info.architectures.forEach(arch => allArchs.add(arch));
+                    }
+                });
+                
+                const sortedVersions = Object.keys(this.filteredData).sort((a, b) => {
+                    return this.compareVersions(b, a); // Descending order
+                });
+
+                document.getElementById('totalReleases').textContent = releases;
+                document.getElementById('totalArchs').textContent = allArchs.size;
+                document.getElementById('latestVersion').textContent = sortedVersions[0] || 'N/A';
+            }
+
+            compareVersions(a, b) {
+                const aParts = a.split('.').map(Number);
+                const bParts = b.split('.').map(Number);
+                
+                for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+                    const aPart = aParts[i] || 0;
+                    const bPart = bParts[i] || 0;
+                    if (aPart !== bPart) return aPart - bPart;
+                }
+                return 0;
+            }
+
+            renderTimeline() {
+                const timeline = document.getElementById('timeline');
+                
+                // Sort versions by release date (newest first)
+                const sortedEntries = Object.entries(this.filteredData)
+                    .filter(([_, info]) => info.release_date)
+                    .sort(([_, a], [__, b]) => {
+                        return new Date(b.release_date) - new Date(a.release_date);
+                    });
+
+                timeline.innerHTML = '';
+
+                sortedEntries.forEach(([version, info], index) => {
+                    const item = document.createElement('div');
+                    item.className = 'release-item';
+                    
+                    const architecturesHtml = info.architectures 
+                        ? info.architectures.map(arch => `<span class="arch-tag">${arch}</span>`).join('')
+                        : '<span class="arch-tag">No architecture data</span>';
+
+                    item.innerHTML = `
+                        <div class="release-content">
+                            <div class="release-version">${version}</div>
+                            <div class="release-date">${info.release_date}</div>
+                            <div>Supported CUDA Architectures:</div>
+                            <div class="architectures">${architecturesHtml}</div>
+                        </div>
+                        <div class="timeline-dot"></div>
+                    `;
+
+                    timeline.appendChild(item);
+                });
+
+                // Trigger animation
+                setTimeout(() => {
+                    document.querySelectorAll('.release-item').forEach((item, index) => {
+                        setTimeout(() => {
+                            item.classList.add('visible');
+                        }, index * 100);
+                    });
+                }, 100);
+            }
+
+            animateOnScroll() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.transform = 'scale(1.02)';
+                            setTimeout(() => {
+                                entry.target.style.transform = 'scale(1)';
+                            }, 200);
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                document.querySelectorAll('.release-content').forEach(content => {
+                    observer.observe(content);
+                });
+            }
+        }
+
+        // Initialize the timeline
+        // TO USE WITH YOUR DATA: Replace 'sampleData' with your actual JSON data
+        // You can either:
+        // 1. Replace sampleData with your data directly
+        // 2. Load it from your JSON file using fetch()
+        // 3. Paste your JSON data into the sampleData variable
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new PyTorchTimeline(sampleData);
+        });
+
+        // Uncomment this section if you want to load from a JSON file:
+        /*
+        fetch('all_pytorch_architectures.json')
+            .then(response => response.json())
+            .then(data => {
+                new PyTorchTimeline(data);
+            })
+            .catch(error => {
+                console.error('Error loading data:', error);
+                document.getElementById('timeline').innerHTML = 
+                    '<div class="loading">Error loading PyTorch release data. Please check the console.</div>';
+            });
+        */
+    </script>
+</body>
+</html>
